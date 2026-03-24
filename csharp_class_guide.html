@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# 클래스와 객체 — 입문 가이드</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3444;
+    --accent: #58a6ff;
+    --accent2: #f78166;
+    --accent3: #3fb950;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --keyword: #ff7b72;
+    --type: #79c0ff;
+    --string: #a5d6ff;
+    --comment: #6a9955;
+    --method: #d2a8ff;
+    --number: #79c0ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Gowun Dodum', sans-serif;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1f3c 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(88,166,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(88,166,255,0.15);
+    border: 1px solid rgba(88,166,255,0.35);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-family: 'Nanum Gothic Coding', monospace;
+    letter-spacing: 0.12em;
+    padding: 0.3rem 0.9rem;
+    border-radius: 99px;
+    margin-bottom: 1.2rem;
+  }
+  header h1 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin-bottom: 0.6rem;
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* ── Layout ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  /* ── Section headings ── */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 3rem 0 1.25rem;
+  }
+  .section-num {
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.25);
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.35rem;
+    color: #fff;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.25rem;
+  }
+  .card p { color: #c9d1d9; font-size: 0.97rem; }
+  .card + .card { margin-top: 0; }
+
+  /* ── Concept boxes ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  @media(max-width: 600px){ .concept-grid { grid-template-columns: 1fr; } }
+
+  .concept-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.3rem 1.4rem;
+  }
+  .concept-box .icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .concept-box h3 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+  }
+  .concept-box p { color: var(--text-muted); font-size: 0.9rem; }
+  .concept-box.blue  { border-color: rgba(88,166,255,0.35); }
+  .concept-box.green { border-color: rgba(63,185,80,0.35); }
+  .concept-box.purple{ border-color: rgba(210,168,255,0.35); }
+  .concept-box.orange{ border-color: rgba(255,166,87,0.35); }
+  .concept-box.blue h3  { color: var(--accent); }
+  .concept-box.green h3 { color: var(--accent3); }
+  .concept-box.purple h3{ color: var(--accent4); }
+  .concept-box.orange h3{ color: var(--accent5); }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .code-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .code-header span {
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #f78166; }
+  .dot.y { background: #ffa657; }
+  .dot.g { background: #3fb950; }
+
+  pre {
+    padding: 1.4rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.88rem;
+    line-height: 1.85;
+    tab-size: 4;
+  }
+
+  /* syntax colors */
+  .kw  { color: var(--keyword); }
+  .ty  { color: var(--type); }
+  .st  { color: var(--string); }
+  .cm  { color: var(--comment); font-style: italic; }
+  .mt  { color: var(--method); }
+  .nm  { color: var(--number); }
+  .pl  { color: #e6edf3; }
+
+  /* ── Annotation ── */
+  .ann-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.7rem;
+    background: var(--surface2);
+    border-left: 3px solid var(--border);
+  }
+  .ann-line.blue   { border-color: var(--accent); }
+  .ann-line.green  { border-color: var(--accent3); }
+  .ann-line.purple { border-color: var(--accent4); }
+  .ann-line.orange { border-color: var(--accent5); }
+  .ann-line.red    { border-color: var(--accent2); }
+  .ann-num {
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.07);
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+  .ann-text { font-size: 0.92rem; color: #c9d1d9; }
+  .ann-text strong { color: #fff; }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1.3rem;
+    text-align: center;
+    min-width: 130px;
+  }
+  .flow-box .fb-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'Nanum Gothic Coding', monospace;
+    margin-bottom: 0.3rem;
+  }
+  .flow-box .fb-name {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1rem;
+  }
+  .flow-box.blue  { border-color: rgba(88,166,255,0.4); }
+  .flow-box.green { border-color: rgba(63,185,80,0.4); }
+  .flow-box.purple{ border-color: rgba(210,168,255,0.4); }
+  .flow-box.blue .fb-name  { color: var(--accent); }
+  .flow-box.green .fb-name { color: var(--accent3); }
+  .flow-box.purple .fb-name{ color: var(--accent4); }
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    padding: 0 0.5rem;
+  }
+
+  /* ── Callout ── */
+  .callout {
+    background: rgba(63,185,80,0.07);
+    border: 1px solid rgba(63,185,80,0.3);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .callout .icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .callout p { font-size: 0.92rem; color: #c9d1d9; }
+  .callout strong { color: var(--accent3); }
+
+  .callout.warn {
+    background: rgba(255,166,87,0.07);
+    border-color: rgba(255,166,87,0.3);
+  }
+  .callout.warn strong { color: var(--accent5); }
+
+  /* ── Summary table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(42,52,68,0.6);
+    color: #c9d1d9;
+    vertical-align: top;
+  }
+  td code {
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 0.82rem;
+    background: rgba(255,255,255,0.06);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    color: var(--accent4);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">C# · 객체지향 입문</div>
+  <h1>클래스와 <span>객체</span> 이해하기</h1>
+  <p>testEx 예제 코드를 통해 클래스 선언, 메서드, 객체 생성 흐름을 단계별로 살펴봅니다.</p>
+</header>
+
+<main>
+
+  <!-- 1. 핵심 개념 -->
+  <div class="section-title">
+    <span class="section-num">01</span>
+    <h2>핵심 개념 먼저 잡기</h2>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-box blue">
+      <div class="icon">🏗️</div>
+      <h3>클래스 (Class)</h3>
+      <p>물건을 만들기 위한 <strong>설계도</strong>입니다.<br>어떤 기능(메서드)을 가질지 정의합니다.</p>
+    </div>
+    <div class="concept-box green">
+      <div class="icon">📦</div>
+      <h3>객체 (Object)</h3>
+      <p>설계도를 바탕으로 <strong>실제로 만들어진 것</strong>입니다.<br><code>new</code> 키워드로 생성합니다.</p>
+    </div>
+    <div class="concept-box purple">
+      <div class="icon">⚙️</div>
+      <h3>메서드 (Method)</h3>
+      <p>클래스 안에 정의된 <strong>기능(함수)</strong>입니다.<br>객체를 통해 호출합니다.</p>
+    </div>
+    <div class="concept-box orange">
+      <div class="icon">🔗</div>
+      <h3>네임스페이스 (Namespace)</h3>
+      <p>클래스들을 묶어두는 <strong>폴더</strong> 같은 개념입니다.<br>이름 충돌을 방지합니다.</p>
+    </div>
+  </div>
+
+  <!-- 2. 전체 구조 흐름 -->
+  <div class="section-title">
+    <span class="section-num">02</span>
+    <h2>두 파일의 관계</h2>
+  </div>
+
+  <div class="card">
+    <p>이 예제는 <strong>두 개의 파일</strong>로 나뉩니다. <code>testEx.cs</code>에 기능을 정의하고, <code>Program.cs</code>에서 그 기능을 사용합니다.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-box blue">
+      <div class="fb-label">testEx.cs</div>
+      <div class="fb-name">testEx 클래스</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box green">
+      <div class="fb-label">Program.cs</div>
+      <div class="fb-name">new testEx()</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box purple">
+      <div class="fb-label">실행</div>
+      <div class="fb-name">메서드 호출</div>
+    </div>
+  </div>
+
+  <!-- 3. testEx.cs 설명 -->
+  <div class="section-title">
+    <span class="section-num">03</span>
+    <h2>testEx.cs — 클래스 정의</h2>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span>testEx.cs</span>
+    </div>
+    <pre><span class="kw">namespace</span> <span class="pl">PJ_2_1_Day04</span>
+{
+    <span class="kw">internal class</span> <span class="ty">testEx</span>
+    {
+        <span class="cm">// ① 배열 출력 메서드</span>
+        <span class="kw">public void</span> <span class="mt">arrayEx</span>()
+        {
+            <span class="ty">string</span> arr = <span class="st">"C#8"</span>;  <span class="cm">// 문자열 == 문자의 배열</span>
+            <span class="ty">Console</span>.<span class="mt">WriteLine</span>(arr[<span class="nm">0</span>]);  <span class="cm">// 'C'</span>
+            <span class="ty">Console</span>.<span class="mt">WriteLine</span>(arr[<span class="nm">1</span>]);  <span class="cm">// '#'</span>
+            <span class="ty">Console</span>.<span class="mt">WriteLine</span>(arr[<span class="nm">2</span>]);  <span class="cm">// '8'</span>
+        }
+
+        <span class="cm">// ② 사칙연산 계산기 메서드</span>
+        <span class="kw">public void</span> <span class="mt">addEx</span>()
+        {
+            <span class="ty">Console</span>.<span class="mt">Write</span>(<span class="st">"첫 번째 숫자를 입력하세요: "</span>);
+            <span class="kw">double</span> num1 = <span class="ty">Convert</span>.<span class="mt">ToDouble</span>(<span class="ty">Console</span>.<span class="mt">ReadLine</span>());
+
+            <span class="ty">Console</span>.<span class="mt">Write</span>(<span class="st">"두 번째 숫자를 입력하세요: "</span>);
+            <span class="kw">double</span> num2 = <span class="ty">Convert</span>.<span class="mt">ToDouble</span>(<span class="ty">Console</span>.<span class="mt">ReadLine</span>());
+
+            <span class="ty">Console</span>.<span class="mt">Write</span>(<span class="st">"연산을 선택하세요 (+, -, *, /): "</span>);
+            <span class="kw">string</span> operation = <span class="ty">Console</span>.<span class="mt">ReadLine</span>();
+
+            <span class="kw">double</span> result = <span class="nm">0</span>;
+            <span class="kw">switch</span> (operation)
+            {
+                <span class="kw">case</span> <span class="st">"+"</span>: result = num1 + num2; <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">"-"</span>: result = num1 - num2; <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">"*"</span>: result = num1 * num2; <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">"/"</span>:
+                    <span class="kw">if</span> (num1 != <span class="nm">0</span> &amp;&amp; num2 != <span class="nm">0</span>)
+                        result = num1 / num2;
+                    <span class="kw">else</span>
+                        <span class="ty">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"0으로 나눌 수 없습니다."</span>);
+                    <span class="kw">break</span>;
+                <span class="kw">default</span>:
+                    <span class="ty">Console</span>.<span class="mt">WriteLine</span>(<span class="st">"잘못된 연산자입니다."</span>);
+                    <span class="kw">break</span>;
+            }
+            <span class="ty">Console</span>.<span class="mt">WriteLine</span>(<span class="st">$"결과: {result}"</span>);
+        }
+    }
+}</pre>
+  </div>
+
+  <div class="ann-line blue">
+    <span class="ann-num">L3</span>
+    <div class="ann-text"><strong>internal class testEx</strong> — 클래스를 선언합니다. <code>internal</code>은 같은 프로젝트 안에서만 접근 가능하다는 의미입니다.</div>
+  </div>
+  <div class="ann-line green">
+    <span class="ann-num">L6</span>
+    <div class="ann-text"><strong>public void arrayEx()</strong> — 메서드를 선언합니다. <code>public</code>은 외부에서 호출 가능, <code>void</code>는 반환값 없음을 뜻합니다.</div>
+  </div>
+  <div class="ann-line purple">
+    <span class="ann-num">L8</span>
+    <div class="ann-text"><strong>string arr = "C#8"</strong> — C#에서 문자열(string)은 문자(char)의 배열입니다. <code>arr[0]</code>은 'C', <code>arr[1]</code>은 '#', <code>arr[2]</code>는 '8'입니다.</div>
+  </div>
+  <div class="ann-line orange">
+    <span class="ann-num">L14</span>
+    <div class="ann-text"><strong>public void addEx()</strong> — 두 번째 메서드입니다. 사용자 입력을 받아 사칙연산을 수행합니다.</div>
+  </div>
+  <div class="ann-line red">
+    <span class="ann-num">L28</span>
+    <div class="ann-text"><strong>switch (operation)</strong> — 입력된 연산자 문자열에 따라 분기합니다. <code>default</code>는 예상치 못한 입력을 처리합니다.</div>
+  </div>
+
+  <!-- 4. Program.cs 설명 -->
+  <div class="section-title">
+    <span class="section-num">04</span>
+    <h2>Program.cs — 객체 생성 및 메서드 호출</h2>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span>Program.cs</span>
+    </div>
+    <pre><span class="kw">namespace</span> <span class="pl">PJ_2_1_Day04</span>
+{
+    <span class="kw">internal class</span> <span class="ty">Program</span>
+    {
+        <span class="kw">static void</span> <span class="mt">Main</span>()
+        {
+            <span class="cm">// ① 객체 생성 (new 키워드)</span>
+            <span class="ty">testEx</span> print = <span class="kw">new</span> <span class="ty">testEx</span>();
+
+            <span class="cm">// ② 메서드 호출</span>
+            print.<span class="mt">arrayEx</span>();
+            print.<span class="mt">addEx</span>();
+        }
+    }
+}</pre>
+  </div>
+
+  <div class="ann-line blue">
+    <span class="ann-num">L8</span>
+    <div class="ann-text"><strong>testEx print = new testEx();</strong> — 설계도(클래스)를 바탕으로 객체를 실제로 만드는 코드입니다. <code>print</code>는 변수 이름(참조변수)입니다.</div>
+  </div>
+  <div class="ann-line green">
+    <span class="ann-num">L11</span>
+    <div class="ann-text"><strong>print.arrayEx();</strong> — 점(.) 연산자로 객체가 가진 메서드를 호출합니다. <code>객체이름.메서드이름()</code> 형태입니다.</div>
+  </div>
+  <div class="ann-line purple">
+    <span class="ann-num">L12</span>
+    <div class="ann-text"><strong>print.addEx();</strong> — 같은 객체로 두 번째 메서드도 호출합니다. 하나의 객체로 여러 메서드를 쓸 수 있습니다.</div>
+  </div>
+
+  <!-- 5. 핵심 패턴 -->
+  <div class="section-title">
+    <span class="section-num">05</span>
+    <h2>반드시 기억할 3단계 패턴</h2>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span>객체 사용의 3단계</span>
+    </div>
+    <pre><span class="cm">// STEP 1. 클래스 선언 (testEx.cs에서)</span>
+<span class="kw">class</span> <span class="ty">클래스이름</span> { <span class="cm">/* 메서드 정의 */</span> }
+
+<span class="cm">// STEP 2. 객체 생성 (Program.cs에서)</span>
+<span class="ty">클래스이름</span> 변수이름 = <span class="kw">new</span> <span class="ty">클래스이름</span>();
+
+<span class="cm">// STEP 3. 메서드 호출</span>
+변수이름.<span class="mt">메서드이름</span>();</pre>
+  </div>
+
+  <div class="callout">
+    <div class="icon">✅</div>
+    <p><strong>이 예제의 핵심:</strong> <code>testEx</code>라는 클래스에 <code>arrayEx()</code>와 <code>addEx()</code> 두 가지 기능을 담아두고, <code>Program.cs</code>에서 <code>new testEx()</code>로 객체를 하나 만든 뒤 필요한 메서드를 순서대로 호출합니다.</p>
+  </div>
+
+  <!-- 6. 요약 표 -->
+  <div class="section-title">
+    <span class="section-num">06</span>
+    <h2>주요 요소 정리</h2>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>요소</th>
+          <th>코드 예시</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>클래스 선언</td>
+          <td><code>internal class testEx</code></td>
+          <td>기능의 설계도를 만듭니다</td>
+        </tr>
+        <tr>
+          <td>메서드 선언</td>
+          <td><code>public void arrayEx()</code></td>
+          <td>클래스 안에 기능을 정의합니다</td>
+        </tr>
+        <tr>
+          <td>객체 생성</td>
+          <td><code>new testEx()</code></td>
+          <td>설계도로 실제 객체를 만듭니다</td>
+        </tr>
+        <tr>
+          <td>메서드 호출</td>
+          <td><code>print.arrayEx()</code></td>
+          <td>객체의 기능을 실행합니다</td>
+        </tr>
+        <tr>
+          <td>문자열 인덱스</td>
+          <td><code>arr[0]</code></td>
+          <td>문자열의 각 문자에 접근합니다</td>
+        </tr>
+        <tr>
+          <td>형변환</td>
+          <td><code>Convert.ToDouble(...)</code></td>
+          <td>문자열 입력을 숫자로 변환합니다</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <div class="icon">⚠️</div>
+    <p><strong>자주 하는 실수:</strong> <code>static</code> 메서드가 아닌 일반 메서드를 호출하려면 반드시 <code>new</code>로 객체를 먼저 만들어야 합니다. 객체 없이 바로 <code>testEx.arrayEx()</code>처럼 호출하면 오류가 납니다.</p>
+  </div>
+
+</main>
+
+<footer>
+  C# 객체지향 입문 참고 자료 &nbsp;|&nbsp; PJ_2_1_Day04 예제 기반
+</footer>
+
+</body>
+</html>
